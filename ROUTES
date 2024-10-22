@@ -1,0 +1,59 @@
+const express = require('express')
+const router = express.Router()
+const Transaction = require('../models/transaction')
+
+router.get('/', async (req, res) => {
+  try {
+    const transactions = await Transaction.getAll()
+    res.json(transactions)
+  } catch (err) {
+    res.status(500).json({message: err.message})
+  }
+})
+
+router.get('/:id', async (req, res) => {
+  const id = req.params.id
+  try {
+    const transaction = await Transaction.getById(id)
+    if (transaction) {
+      res.json(transaction)
+    } else {
+      res.status(404).json({message: `Transaction with ID ${id} not found`})
+    }
+  } catch (err) {
+    res.status(500).json({message: err.message})
+  }
+})
+
+router.post('/', async (req, res) => {
+  const transaction = req.body
+  try {
+    const result = await Transaction.create(transaction)
+    res.status(201).json({message: result})
+  } catch (err) {
+    res.status(500).json({message: err.message})
+  }
+})
+
+router.put('/:id', async (req, res) => {
+  const id = req.params.id
+  const updatedTransaction = req.body
+  try {
+    const result = await Transaction.update(id, updatedTransaction)
+    res.json({message: result})
+  } catch (err) {
+    res.status(500).json({message: err.message})
+  }
+})
+
+router.delete('/:id', async (req, res) => {
+  const id = req.params.id
+  try {
+    const result = await Transaction.delete(id)
+    res.json({message: result})
+  } catch (err) {
+    res.status(500).json({message: err.message})
+  }
+})
+
+module.exports = router
