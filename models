@@ -1,1 +1,66 @@
+const db = require('../utils/db')
 
+const Transaction = {
+  getAll: () =>
+    new Promise((resolve, reject) => {
+      db.all('SELECT * FROM transactions', (err, rows) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve(rows)
+        }
+      })
+    }),
+  getById: id =>
+    new Promise((resolve, reject) => {
+      db.get('SELECT * FROM transactions WHERE id = ?', [id], (err, row) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve(row)
+        }
+      })
+    }),
+  create: transaction =>
+    new Promise((resolve, reject) => {
+      const {type, category, amount, date, description} = transaction
+      db.run(
+        'INSERT INTO transactions (type, category, amount, date, description) VALUES (?, ?, ?, ?, ?)',
+        [type, category, amount, date, description],
+        err => {
+          if (err) {
+            reject(err)
+          } else {
+            resolve(`Transaction with ID ${db.lastID} created successfully!`)
+          }
+        },
+      )
+    }),
+  update: (id, updatedTransaction) =>
+    new Promise((resolve, reject) => {
+      const {type, category, amount, date, description} = updatedTransaction
+      db.run(
+        'UPDATE transactions SET type = ?, category = ?, amount = ?, date = ?, description = ? WHERE id = ?',
+        [type, category, amount, date, description, id],
+        err => {
+          if (err) {
+            reject(err)
+          } else {
+            resolve(`Transaction with ID ${id} updated successfully!`)
+          }
+        },
+      )
+    }),
+  delete: id =>
+    new Promise((resolve, reject) => {
+      db.run('DELETE FROM transactions WHERE id = ?', [id], err => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve(`Transaction with ID ${id} deleted successfully!`)
+        }
+      })
+    }),
+}
+
+module.exports = Transaction
